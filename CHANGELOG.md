@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial release as a standalone package, extracted from `com.draasgames.core`.
 - `DLogger` static API: `Log`, `LogWarning`, `LogError`, `LogException` with optional sender and tags.
 - `DLogLevel` minimum-level filtering, configured via `DLoggerSettings` asset (Project Settings > DraasGames > DLogger).
-- Pluggable sinks via `ILoggerService` (`AddLogger` / `RemoveLogger`).
+- Pluggable sinks via `ILoggerService` (`AddLogger` / `RemoveLogger`). A default console sink is registered on every player platform; the editor uses a color-formatted one.
 - Strongly-typed tags (`DLogTag`) with compile-safe generated constants (`DraasGames/Logger/Generate Tags`).
 - DConsole editor window (`Window/DraasGames/Console`): tag and level filtering, search, collapse, clickable stack traces.
 

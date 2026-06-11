@@ -39,9 +39,11 @@ namespace DraasGames.Logging
 
         static DLogger()
         {
+            // A default sink must exist on every platform (WebGL, consoles, etc. included),
+            // otherwise player builds silently swallow all messages.
 #if UNITY_EDITOR
             Loggers.Add(new FormattedConsoleLoggerService());
-#elif UNITY_ANDROID || UNITY_IOS || UNITY_STANDALONE
+#else
             Loggers.Add(new DefaultConsoleLoggerService());
 #endif
         }
@@ -97,14 +99,14 @@ namespace DraasGames.Logging
             Dispatch(DLogLevel.Error, message, sender, null, tags);
         }
 
-        public static void LogException(Exception exception, params DLogTag[] tags)
+        public static void LogException(Exception exception, object sender = null, params DLogTag[] tags)
         {
             if (!ShouldLog(DLogLevel.Exception))
             {
                 return;
             }
 
-            Dispatch(DLogLevel.Exception, exception?.Message, null, exception, tags);
+            Dispatch(DLogLevel.Exception, exception?.Message, sender, exception, tags);
         }
 
         private static void Dispatch(DLogLevel level, string message, object sender, Exception exception, DLogTag[] tags)

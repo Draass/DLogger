@@ -19,7 +19,7 @@ using DraasGames.Logging;
 DLogger.Log(string message, object sender = null, params DLogTag[] tags);
 DLogger.LogWarning(string message, object sender = null, params DLogTag[] tags);
 DLogger.LogError(string message, object sender = null, params DLogTag[] tags);
-DLogger.LogException(Exception exception, params DLogTag[] tags);
+DLogger.LogException(Exception exception, object sender = null, params DLogTag[] tags);
 ```
 
 `sender` is used to prefix messages with `[TypeName]` and to show the sender column in DConsole.
