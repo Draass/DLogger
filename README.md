@@ -16,7 +16,7 @@ Tagged, level-filtered logging for Unity with a custom console window.
 `Window > Package Manager > + > Add package from git URL...`
 
 ```
-https://github.com/Draass/DraasGames.DLogger.git#v0.1.0
+https://github.com/Draass/DLogger.git#v0.1.0
 ```
 
 ### Requirements
