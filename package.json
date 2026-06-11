@@ -1,0 +1,27 @@
+{
+  "name": "com.draasgames.dlogger",
+  "version": "0.1.0",
+  "displayName": "DLogger",
+  "description": "Tagged, level-filtered logging for Unity: DLogger static API, pluggable sinks, compile-safe generated tag constants, and the DConsole editor window with tag/level filtering, collapse and clickable stack traces.",
+  "unity": "2022.3",
+  "license": "MIT",
+  "keywords": [
+    "logging",
+    "logger",
+    "console",
+    "debug",
+    "tags"
+  ],
+  "author": {
+    "name": "Evgenii Agaev",
+    "email": "draas.games@gmail.com"
+  },
+  "dependencies": {},
+  "samples": [
+    {
+      "displayName": "Basic Usage",
+      "description": "Minimal example showing log levels, tags and the DConsole window.",
+      "path": "Samples~/BasicUsage"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+    "name": "DraasGames.DLogger.Editor",
+    "rootNamespace": "DraasGames.Logging.Editor",
+    "references": [
+        "DraasGames.DLogger"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

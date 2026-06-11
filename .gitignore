@@ -1,0 +1,10 @@
+# IDE
+.idea/
+.vs/
+*.csproj
+*.sln
+*.user
+
+# OS
+.DS_Store
+Thumbs.db
