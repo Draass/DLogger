@@ -5,6 +5,15 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-06-12
+
+### Added
+
+- DConsole: row context menu with Copy / Copy Message / Copy Stack Trace.
+- DConsole: Save button that exports the captured log to a text file.
+- DConsole: Error Pause toggle — pauses Play mode when an error or exception is logged.
+- Console buffer capacity is now configurable via DLoggerSettings (Console Capacity, default 5000).
+
 ## [0.1.0] - 2026-06-11
 
 ### Added

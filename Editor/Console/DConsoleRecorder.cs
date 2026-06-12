@@ -83,6 +83,8 @@ namespace DraasGames.Logging.Editor.Console
     {
         private const int LevelCount = 4; // Info, Warning, Error, Exception
         private const string ClearOnPlayKey = "DraasGames.DConsole.ClearOnPlay";
+        private const string ErrorPauseKey = "DraasGames.DConsole.ErrorPause";
+        private const int MinCapacity = 100;
 
         private static readonly List<DConsoleEntry> Entries = new(256);
         private static readonly int[] Counts = new int[LevelCount];
@@ -95,8 +97,24 @@ namespace DraasGames.Logging.Editor.Console
         /// <summary>Raised whenever the buffer changes. The window coalesces this into a throttled refresh.</summary>
         public static event Action Changed;
 
-        /// <summary>Maximum number of retained entries; the oldest are trimmed past this.</summary>
-        public static int Capacity { get; set; } = 5000;
+        private static int _capacity = 5000;
+
+        /// <summary>
+        /// Maximum number of retained entries; the oldest are trimmed past this. Initialized from
+        /// <see cref="DLoggerSettings.ConsoleCapacity"/> and kept in sync by the settings provider.
+        /// </summary>
+        public static int Capacity
+        {
+            get => _capacity;
+            set
+            {
+                _capacity = Mathf.Max(MinCapacity, value);
+                if (TrimToCapacity())
+                {
+                    Changed?.Invoke();
+                }
+            }
+        }
 
         public static IReadOnlyList<DConsoleEntry> Snapshot => Entries;
 
@@ -106,8 +124,21 @@ namespace DraasGames.Logging.Editor.Console
             set => EditorPrefs.SetBool(ClearOnPlayKey, value);
         }
 
+        /// <summary>When enabled, an Error or Exception entry logged during Play mode pauses the editor.</summary>
+        public static bool ErrorPause
+        {
+            get => EditorPrefs.GetBool(ErrorPauseKey, false);
+            set => EditorPrefs.SetBool(ErrorPauseKey, value);
+        }
+
         static DConsoleRecorder()
         {
+            var settings = Resources.Load<DLoggerSettings>(DLoggerSettings.ResourcePath);
+            if (settings != null)
+            {
+                _capacity = Mathf.Max(MinCapacity, settings.ConsoleCapacity);
+            }
+
             DLogger.MessageLogged += OnDLoggerMessage;
             Application.logMessageReceived += OnUnityMessage;
             EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
@@ -201,22 +232,37 @@ namespace DraasGames.Logging.Editor.Console
                 Counts[levelIndex]++;
             }
 
-            var overflow = Entries.Count - Capacity;
-            if (overflow > 0)
-            {
-                for (var i = 0; i < overflow; i++)
-                {
-                    var removedLevel = (int)Entries[i].Level;
-                    if (removedLevel >= 0 && removedLevel < LevelCount)
-                    {
-                        Counts[removedLevel]--;
-                    }
-                }
+            TrimToCapacity();
 
-                Entries.RemoveRange(0, overflow);
+            if (ErrorPause && !entry.IsCompileError && Application.isPlaying
+                && (entry.Level == DLogLevel.Error || entry.Level == DLogLevel.Exception))
+            {
+                EditorApplication.isPaused = true;
             }
 
             Changed?.Invoke();
+        }
+
+        /// <summary>Drops the oldest entries past <see cref="Capacity"/>. Returns true when anything was removed.</summary>
+        private static bool TrimToCapacity()
+        {
+            var overflow = Entries.Count - _capacity;
+            if (overflow <= 0)
+            {
+                return false;
+            }
+
+            for (var i = 0; i < overflow; i++)
+            {
+                var removedLevel = (int)Entries[i].Level;
+                if (removedLevel >= 0 && removedLevel < LevelCount)
+                {
+                    Counts[removedLevel]--;
+                }
+            }
+
+            Entries.RemoveRange(0, overflow);
+            return true;
         }
 
         private static void OnPlayModeStateChanged(PlayModeStateChange state)

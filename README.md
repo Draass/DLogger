@@ -6,7 +6,7 @@ Tagged, level-filtered logging for Unity with a custom console window.
 - **Strongly-typed tags** — define tag names once, generate a compile-safe `DLogTags` constants class, then write `DLogger.Log("Loaded", this, DLogTags.UI)`.
 - **Minimum level filtering** — configured per project via a `DLoggerSettings` asset (Project Settings > DraasGames > DLogger).
 - **Pluggable sinks** — implement `ILoggerService` and register it with `DLogger.AddLogger` to forward messages anywhere (file, server, on-screen overlay).
-- **DConsole** — a Unity-console-like editor window (`Window > DraasGames > Console`) with per-level toggles, a multi-select tag filter, free-text search, collapse mode and clickable stack traces.
+- **DConsole** — a Unity-console-like editor window (`Window > DraasGames > Console`) with per-level toggles, a multi-select tag filter, free-text search, collapse mode, error pause, copy/save-to-file export and clickable stack traces.
 - **Zero dependencies** — runtime code depends only on UnityEngine.
 
 ## Installation
@@ -16,7 +16,7 @@ Tagged, level-filtered logging for Unity with a custom console window.
 `Window > Package Manager > + > Add package from git URL...`
 
 ```
-https://github.com/Draass/DLogger.git#v0.1.0
+https://github.com/Draass/DLogger.git#v0.2.0
 ```
 
 ### Requirements

@@ -106,6 +106,12 @@ namespace DraasGames.Logging.Editor.Console
 
             toolbar.Add(new ToolbarButton(OnClearClicked) { text = "Clear" });
 
+            toolbar.Add(new ToolbarButton(OnSaveClicked)
+            {
+                text = "Save",
+                tooltip = "Save the captured log to a text file"
+            });
+
             var collapse = new ToolbarToggle { text = "Collapse", value = _collapse };
             collapse.RegisterValueChangedCallback(evt =>
             {
@@ -118,6 +124,15 @@ namespace DraasGames.Logging.Editor.Console
             var clearOnPlay = new ToolbarToggle { text = "Clear on Play", value = DConsoleRecorder.ClearOnPlay };
             clearOnPlay.RegisterValueChangedCallback(evt => DConsoleRecorder.ClearOnPlay = evt.newValue);
             toolbar.Add(clearOnPlay);
+
+            var errorPause = new ToolbarToggle
+            {
+                text = "Error Pause",
+                value = DConsoleRecorder.ErrorPause,
+                tooltip = "Pause Play mode when an error or exception is logged"
+            };
+            errorPause.RegisterValueChangedCallback(evt => DConsoleRecorder.ErrorPause = evt.newValue);
+            toolbar.Add(errorPause);
 
             var autoScroll = new ToolbarToggle { text = "Auto-scroll", value = _autoScroll };
             autoScroll.RegisterValueChangedCallback(evt =>
@@ -224,6 +239,7 @@ namespace DraasGames.Logging.Editor.Console
             row.style.alignItems = Align.Center;
             row.style.paddingLeft = 2;
             row.style.paddingRight = 4;
+            row.AddManipulator(new ContextualMenuManipulator(PopulateRowMenu));
 
             var icon = new Image { name = "icon", scaleMode = ScaleMode.ScaleToFit };
             icon.style.width = 16;
@@ -281,6 +297,7 @@ namespace DraasGames.Logging.Editor.Console
 
             var row = _rows[index];
             var entry = row.Entry;
+            element.userData = row; // consumed by the row context menu
 
             var icon = element.Q<Image>("icon");
             if (icon != null)
@@ -342,6 +359,82 @@ namespace DraasGames.Logging.Editor.Console
         private void OnClearClicked()
         {
             DConsoleRecorder.Clear();
+        }
+
+        private static void OnSaveClicked()
+        {
+            var path = EditorUtility.SaveFilePanel(
+                "Save Console Log",
+                string.Empty,
+                "console-log-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".txt",
+                "txt");
+            if (string.IsNullOrEmpty(path))
+            {
+                return;
+            }
+
+            System.IO.File.WriteAllText(path, BuildLogText());
+            EditorUtility.RevealInFinder(path);
+        }
+
+        /// <summary>Formats the full capture buffer (unfiltered) the way Unity's own Save does.</summary>
+        private static string BuildLogText()
+        {
+            var sb = new StringBuilder();
+            var source = DConsoleRecorder.Snapshot;
+
+            for (var i = 0; i < source.Count; i++)
+            {
+                var entry = source[i];
+
+                sb.Append('[').Append(entry.Time.ToString("HH:mm:ss")).Append("] ");
+                sb.Append('[').Append(entry.Level).Append("] ");
+
+                if (entry.Tags != null && entry.Tags.Count > 0)
+                {
+                    sb.Append(BuildTags(entry)).Append(' ');
+                }
+
+                if (!string.IsNullOrEmpty(entry.Sender))
+                {
+                    sb.Append('[').Append(entry.Sender).Append("] ");
+                }
+
+                sb.AppendLine(entry.Message);
+
+                if (!string.IsNullOrEmpty(entry.StackTrace))
+                {
+                    sb.AppendLine(entry.StackTrace.TrimEnd('\n', '\r'));
+                }
+
+                sb.AppendLine();
+            }
+
+            return sb.ToString();
+        }
+
+        private static void PopulateRowMenu(ContextualMenuPopulateEvent evt)
+        {
+            if (!(evt.currentTarget is VisualElement element) || !(element.userData is DConsoleRow row))
+            {
+                return;
+            }
+
+            var entry = row.Entry;
+            var hasTrace = !string.IsNullOrEmpty(entry.StackTrace);
+
+            evt.menu.AppendAction(
+                "Copy",
+                _ => EditorGUIUtility.systemCopyBuffer = hasTrace
+                    ? entry.Message + "\n" + entry.StackTrace
+                    : entry.Message ?? string.Empty);
+            evt.menu.AppendAction(
+                "Copy Message",
+                _ => EditorGUIUtility.systemCopyBuffer = entry.Message ?? string.Empty);
+            evt.menu.AppendAction(
+                "Copy Stack Trace",
+                _ => EditorGUIUtility.systemCopyBuffer = entry.StackTrace,
+                hasTrace ? DropdownMenuAction.Status.Normal : DropdownMenuAction.Status.Disabled);
         }
 
         private void OnRecorderChanged()

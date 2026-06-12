@@ -15,6 +15,10 @@ namespace DraasGames.Logging
 
         [SerializeField] private DLogLevel _minimumLevel = DLogLevel.Info;
 
+        [Header("Console")]
+        [Tooltip("Maximum number of messages the DConsole window keeps; the oldest entries are trimmed past this.")]
+        [SerializeField] private int _consoleCapacity = 5000;
+
         [Header("Tags")]
         [Tooltip("Tag names available to DLogger. Edit here, then click \"Generate Tags\" to (re)build the DLogTags constants class.")]
         [SerializeField] private List<string> _tags = new() { "Gameplay", "UI", "Network", "Audio" };
@@ -26,6 +30,8 @@ namespace DraasGames.Logging
         [SerializeField] private string _generatedTagsPath = "Assets/DraasGames/Generated/DLogTags.cs";
 
         public DLogLevel MinimumLevel => _minimumLevel;
+
+        public int ConsoleCapacity => Mathf.Max(100, _consoleCapacity);
 
         public IReadOnlyList<string> Tags => _tags;
 

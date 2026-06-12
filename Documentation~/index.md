@@ -65,8 +65,13 @@ Open via **Window > DraasGames > Console**.
 - Free-text search across message, sender and tags.
 - Collapse mode groups identical messages with an occurrence badge.
 - Clear on Play, auto-scroll.
+- Error Pause — pauses Play mode when an error or exception is logged.
+- Right-click a row to copy the message and/or stack trace; the Save button exports the whole
+  captured log to a text file.
 - Double-click a row (or click a stack frame in the detail pane) to open the source line in your IDE.
 - Compiler errors are kept through manual Clear so they stay visible until fixed.
+- The capture buffer keeps up to "Console Capacity" messages (configurable in the settings,
+  default 5000); the oldest entries are trimmed.
 
 ## Settings asset
 

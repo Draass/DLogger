@@ -45,6 +45,7 @@ namespace DraasGames.Logging.Editor
 
             var serializedObject = new SerializedObject(settings);
             var minimumLevelProperty = serializedObject.FindProperty("_minimumLevel");
+            var consoleCapacityProperty = serializedObject.FindProperty("_consoleCapacity");
 
             EditorGUILayout.LabelField("General", EditorStyles.boldLabel);
             EditorGUILayout.Space(2f);
@@ -58,6 +59,9 @@ namespace DraasGames.Logging.Editor
 
                 EditorGUI.BeginChangeCheck();
                 EditorGUILayout.PropertyField(minimumLevelProperty, new GUIContent("Minimum Level"));
+                EditorGUILayout.PropertyField(
+                    consoleCapacityProperty,
+                    new GUIContent("Console Capacity", "Maximum number of messages the DConsole window keeps."));
 
                 if (EditorGUI.EndChangeCheck())
                 {
@@ -65,6 +69,7 @@ namespace DraasGames.Logging.Editor
                     EditorUtility.SetDirty(settings);
                     AssetDatabase.SaveAssets();
                     DLogger.ReloadSettings();
+                    Console.DConsoleRecorder.Capacity = settings.ConsoleCapacity;
                 }
             }
 
