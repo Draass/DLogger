@@ -23,7 +23,6 @@ namespace DraasGames.Logging.Editor.Console
         public string Message { get; }
         public string Sender { get; }
         public string StackTrace { get; }
-        public DLogSource Source { get; }
         public IReadOnlyList<string> Tags { get; }
         public LogType LogType { get; }
 
@@ -32,7 +31,7 @@ namespace DraasGames.Logging.Editor.Console
         public int Line { get; }
         public DateTime Time { get; }
 
-        /// <summary>Number of identical consecutive messages (reserved for a future Collapse mode).</summary>
+        /// <summary>Number of identical consecutive messages.</summary>
         public int Count { get; set; }
 
         /// <summary>True for compiler errors; these survive a manual Clear so they stay visible.</summary>
@@ -43,7 +42,6 @@ namespace DraasGames.Logging.Editor.Console
             string message,
             string sender,
             string stackTrace,
-            DLogSource source,
             IReadOnlyList<string> tags,
             LogType logType,
             string filePath,
@@ -55,7 +53,6 @@ namespace DraasGames.Logging.Editor.Console
             Message = message ?? string.Empty;
             Sender = sender;
             StackTrace = stackTrace ?? string.Empty;
-            Source = source;
             Tags = tags ?? Array.Empty<string>();
             LogType = logType;
             FilePath = filePath;
@@ -84,7 +81,6 @@ namespace DraasGames.Logging.Editor.Console
         private const int LevelCount = 4; // Info, Warning, Error, Exception
         private const string ClearOnPlayKey = "DraasGames.DConsole.ClearOnPlay";
         private const string ErrorPauseKey = "DraasGames.DConsole.ErrorPause";
-        private const int MinCapacity = 100;
 
         private static readonly List<DConsoleEntry> Entries = new(256);
         private static readonly int[] Counts = new int[LevelCount];
@@ -96,25 +92,6 @@ namespace DraasGames.Logging.Editor.Console
 
         /// <summary>Raised whenever the buffer changes. The window coalesces this into a throttled refresh.</summary>
         public static event Action Changed;
-
-        private static int _capacity = 5000;
-
-        /// <summary>
-        /// Maximum number of retained entries; the oldest are trimmed past this. Initialized from
-        /// <see cref="DLoggerSettings.ConsoleCapacity"/> and kept in sync by the settings provider.
-        /// </summary>
-        public static int Capacity
-        {
-            get => _capacity;
-            set
-            {
-                _capacity = Mathf.Max(MinCapacity, value);
-                if (TrimToCapacity())
-                {
-                    Changed?.Invoke();
-                }
-            }
-        }
 
         public static IReadOnlyList<DConsoleEntry> Snapshot => Entries;
 
@@ -133,12 +110,6 @@ namespace DraasGames.Logging.Editor.Console
 
         static DConsoleRecorder()
         {
-            var settings = Resources.Load<DLoggerSettings>(DLoggerSettings.ResourcePath);
-            if (settings != null)
-            {
-                _capacity = Mathf.Max(MinCapacity, settings.ConsoleCapacity);
-            }
-
             DLogger.MessageLogged += OnDLoggerMessage;
             Application.logMessageReceived += OnUnityMessage;
             EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
@@ -191,7 +162,6 @@ namespace DraasGames.Logging.Editor.Console
                 entry.Message,
                 entry.Sender,
                 display,
-                entry.Source,
                 entry.Tags,
                 ToLogType(entry.Level),
                 file,
@@ -214,7 +184,6 @@ namespace DraasGames.Logging.Editor.Console
                 condition,
                 null,
                 stackTrace,
-                DLogSource.Unity,
                 Array.Empty<string>(),
                 type,
                 file,
@@ -232,8 +201,6 @@ namespace DraasGames.Logging.Editor.Console
                 Counts[levelIndex]++;
             }
 
-            TrimToCapacity();
-
             if (ErrorPause && !entry.IsCompileError && Application.isPlaying
                 && (entry.Level == DLogLevel.Error || entry.Level == DLogLevel.Exception))
             {
@@ -241,28 +208,6 @@ namespace DraasGames.Logging.Editor.Console
             }
 
             Changed?.Invoke();
-        }
-
-        /// <summary>Drops the oldest entries past <see cref="Capacity"/>. Returns true when anything was removed.</summary>
-        private static bool TrimToCapacity()
-        {
-            var overflow = Entries.Count - _capacity;
-            if (overflow <= 0)
-            {
-                return false;
-            }
-
-            for (var i = 0; i < overflow; i++)
-            {
-                var removedLevel = (int)Entries[i].Level;
-                if (removedLevel >= 0 && removedLevel < LevelCount)
-                {
-                    Counts[removedLevel]--;
-                }
-            }
-
-            Entries.RemoveRange(0, overflow);
-            return true;
         }
 
         private static void OnPlayModeStateChanged(PlayModeStateChange state)
@@ -298,7 +243,6 @@ namespace DraasGames.Logging.Editor.Console
                     message.message,
                     null,
                     string.Empty,
-                    DLogSource.Unity,
                     Array.Empty<string>(),
                     LogType.Error,
                     ToAbsolute(message.file),

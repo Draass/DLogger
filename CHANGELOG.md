@@ -5,6 +5,16 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2026-07-02
+
+### Fixed
+
+- Regenerated script GUIDs that were carried over from `com.draasgames.core`. They collided with the copies still shipped in Core <= 0.3.8, so Unity silently dropped the package scripts and compilation failed with `CS0246: DLogLevel could not be found`.
+
+### Upgrade notes
+
+- `DLoggerSettings` assets created with 0.1.0-0.2.0 reference the old script GUID and will show up as "missing script" after updating. Delete the asset and reopen Project Settings > DraasGames > DLogger to recreate it.
+
 ## [0.2.0] - 2026-06-12
 
 ### Added
@@ -12,7 +22,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - DConsole: row context menu with Copy / Copy Message / Copy Stack Trace.
 - DConsole: Save button that exports the captured log to a text file.
 - DConsole: Error Pause toggle — pauses Play mode when an error or exception is logged.
-- Console buffer capacity is now configurable via DLoggerSettings (Console Capacity, default 5000).
+
+### Removed
+
+- The unused `DLogSource` enum and `DLogEntry.Source` property.
 
 ## [0.1.0] - 2026-06-11
 

@@ -117,7 +117,7 @@ namespace DraasGames.Logging
             // clean entry, with the tags intact. Only allocate the entry when something is listening.
             if (MessageLogged != null)
             {
-                var entry = new DLogEntry(level, message, sender?.GetType().Name, exception, DLogSource.DLogger, tagNames);
+                var entry = new DLogEntry(level, message, sender?.GetType().Name, exception, tagNames);
                 MessageLogged.Invoke(entry);
             }
 

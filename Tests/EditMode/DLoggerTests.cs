@@ -90,7 +90,6 @@ namespace DraasGames.Logging.Tests.EditMode
             Assert.That(captured.Value.Level, Is.EqualTo(DLogLevel.Info));
             Assert.That(captured.Value.Message, Is.EqualTo("hello"));
             Assert.That(captured.Value.Sender, Is.EqualTo(nameof(DLoggerTests)));
-            Assert.That(captured.Value.Source, Is.EqualTo(DLogSource.DLogger));
             Assert.That(captured.Value.Tags, Is.Empty);
         }
 
